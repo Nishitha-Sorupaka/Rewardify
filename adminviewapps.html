@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Apps</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="bg-gray-300 w-1/4 h-screen p-4">
+            <nav>
+                <ul>
+                    <li class="mb-4">
+                        <a href="adminhome.html" class="bg-white text-blue-600 py-2 px-4 rounded-lg block text-center shadow-md hover:bg-blue-100">
+                            Home
+                        </a>
+                    </li>
+                    <li class="mb-4">
+                        <a href="adminaddapps.html" class="bg-white text-blue-600 py-2 px-4 rounded-lg block text-center shadow-md hover:bg-blue-100">
+                            + Add Apps
+                        </a>
+                    </li>
+                    <li class="mb-4">
+                        <a href="adminviewapps.html" class="bg-blue-600 text-white py-2 px-4 rounded-lg block text-center shadow-md hover:bg-blue-700">
+                            View Apps
+                        </a>
+                    </li>
+                    <li class="mb-4">
+                        <a href="adminmanageusers.html" class="bg-white text-blue-600 py-2 px-4 rounded-lg block text-center shadow-md hover:bg-blue-100">
+                            Manage Users
+                        </a>
+                    </li>
+                    <li class="mb-4">
+                        <a href="index.html" class="bg-white text-blue-600 py-2 px-4 rounded-lg block text-center shadow-md hover:bg-blue-100">
+                            Logout
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-8">
+            <div class="bg-white shadow-lg text-center rounded-lg p-6">
+                <h2 class="text-2xl font-bold mb-4">View and Manage Apps</h2><br>
+
+                <!-- App List Table -->
+                <table class="min-w-full table-auto">
+                    <thead>
+                        <tr class="bg-gray-200">
+                            <th class="py-2 px-4 border">App Name</th>
+                            <th class="py-2 px-4 border">App Link</th>
+                            <th class="py-2 px-4 border">Points</th>
+                            <th class="py-2 px-4 border">Category</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dynamic Content will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const token = localStorage.getItem("token");
+
+            if (!token) {
+                alert("Unauthorized! Please log in again.");
+                window.location.href = "Login.html";
+                return;
+            }
+
+            fetch("http://127.0.0.1:8000/api/apps/", {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else if (response.status === 401) {
+                        alert("Session expired. Please log in again.");
+                        window.location.href = "Login.html";
+                    } else {
+                        throw new Error(`Failed to fetch apps. Status: ${response.status}`);
+                    }
+                })
+                .then(data => {
+                    const tableBody = document.querySelector("tbody");
+                    tableBody.innerHTML = data.map(app => `
+                        <tr>
+                            <td class="py-2 px-4 border">${app.name}</td>
+                            <td class="py-2 px-4 border">
+                                <a href="${app.link}" class="text-blue-500" target="_blank">Link</a>
+                            </td>
+                            <td class="py-2 px-4 border">${app.points}</td>
+                            <td class="py-2 px-4 border">${app.category}</td>
+                        </tr>
+                    `).join("");
+                })
+                .catch(error => {
+                    console.error("Error fetching apps:", error);
+                    alert("Failed to load apps. Please try again.");
+                });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="bg-gray-300 w-1/4 h-screen p-4">
+            <nav>
+                <ul>
+                    <li class="mb-4">
+                        <a href="adminhome.html" class="bg-blue-600 text-white py-2 px-4 rounded-lg block text-center shadow-md hover:bg-blue-500">
+                            Home
+                        </a>
+                    </li>
+                    <li class="mb-4">
+                        <a href="adminaddapps.html" class="bg-white text-blue-600 py-2 px-4 rounded-lg block text-center shadow-md hover:bg-blue-100">
+                            + Add Apps
+                        </a>
+                    </li>
+                    <li class="mb-4">
+                        <a href="adminviewapps.html" class="bg-white text-blue-600 py-2 px-4 rounded-lg block text-center shadow-md hover:bg-blue-100">
+                            View Apps
+                        </a>
+                    </li>
+                    <li class="mb-4">
+                        <a href="adminmanageusers.html" class="bg-white text-blue-600 py-2 px-4 rounded-lg block text-center shadow-md hover:bg-blue-100">
+                            Manage Users
+                        </a>
+                    </li>
+                    <li class="mb-4">
+                        <a href="index.html" class="bg-white text-blue-600 py-2 px-4 rounded-lg block text-center shadow-md hover:bg-blue-100">
+                            Logout
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main id="content" class="flex-1 p-8">
+            <div id="dashboard" class="bg-white shadow-lg rounded-lg p-6">
+                <h2 class="text-2xl font-bold mb-4">Welcome to the Admin Dashboard</h2>
+                <p class="text-gray-700">This is the admin panel where you can manage apps and perform actions.</p>
+
+                <!-- Dashboard Stats -->
+                <div class="mt-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-blue-100 text-blue-600 p-4 rounded-lg shadow-md">
+                            <h3 class="text-lg font-bold">Total Users</h3>
+                            <p id="total-users" class="text-2xl font-semibold">0</p>
+                        </div>
+                        <div class="bg-green-100 text-green-600 p-4 rounded-lg shadow-md">
+                            <h3 class="text-lg font-bold">Total Apps</h3>
+                            <p id="total-apps" class="text-2xl font-semibold">0</p>
+                        </div>
+                        <div class="bg-yellow-100 text-yellow-600 p-4 rounded-lg shadow-md">
+                            <h3 class="text-lg font-bold">Users Submitted Tasks</h3>
+                            <p id="total-users-submitted-tasks" class="text-2xl font-semibold">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+                alert('Unauthorized! Please log in again.');
+                window.location.href = 'Login.html';
+                return;
+            }
+
+            try {
+                // Fetch dashboard stats
+                const response = await fetch('http://127.0.0.1:8000/api/admin-dashboard-stats/', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch dashboard stats.');
+                }
+
+                const data = await response.json();
+
+                // Update stats in the dashboard
+                document.getElementById('total-users').textContent = data.total_users;
+                document.getElementById('total-apps').textContent = data.total_apps;
+                document.getElementById('total-users-submitted-tasks').textContent = data.total_users_submitted_task;
+
+            } catch (error) {
+                console.error('Error fetching dashboard stats:', error);
+                alert('Failed to load dashboard stats. Please try again later.');
+            }
+        });
+    </script>
+</body>
+</html>

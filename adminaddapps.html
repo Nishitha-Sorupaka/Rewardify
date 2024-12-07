@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>Add Apps | Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+    <!-- Layout -->
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="bg-gray-300 w-1/4 h-screen p-4">
+            <nav>
+                <ul class="space-y-4">
+                    <li>
+                        <a href="adminhome.html" class="block bg-white text-blue-600 py-2 px-4 rounded-lg text-center shadow-md hover:bg-blue-100">
+                            Home
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adminaddapps.html" class="block bg-blue-600 text-white py-2 px-4 rounded-lg text-center shadow-md hover:bg-blue-700">
+                            + Add Apps
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adminviewapps.html" class="block bg-white text-blue-600 py-2 px-4 rounded-lg text-center shadow-md hover:bg-blue-100">
+                            View Apps
+                        </a>
+                    </li>
+                    <li>
+                        <a href="adminmanageusers.html" class="block bg-white text-blue-600 py-2 px-4 rounded-lg text-center shadow-md hover:bg-blue-100">
+                            Manage Users
+                        </a>
+                    </li>
+                    <li>
+                        <a href="index.html" class="block bg-white text-blue-600 py-2 px-4 rounded-lg text-center shadow-md hover:bg-blue-100">
+                            Logout
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-8">
+            <div class="bg-white shadow-lg rounded-lg p-6">
+                <h2 class="text-2xl font-bold mb-6 text-center">Add New App</h2>
+                <form id="appForm">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <!-- App Name -->
+                        <input type="text" name="name" placeholder="App Name" class="w-full border border-gray-300 rounded-lg py-2 px-4 focus:ring-2 focus:ring-blue-500" required>
+                        <!-- App Link -->
+                        <input type="url" name="link" placeholder="App Link" class="w-full border border-gray-300 rounded-lg py-2 px-4 focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <!-- App Category -->
+                        <select id="categorySelect" name="category" class="w-full border border-gray-300 rounded-lg py-2 px-4 focus:ring-2 focus:ring-blue-500" required>
+                            <option value="" disabled selected>App Category</option>
+                            <option value="socialMedia">Social Media</option>
+                            <option value="productivity">Productivity</option>
+                            <option value="entertainment">Entertainment</option>
+                            <option value="education">Education</option>
+                            <option value="finance">Finance</option>
+                            <option value="healthFitness">Health & Fitness</option>
+                            <option value="shopping">Shopping</option>
+                            <option value="travel">Travel</option>
+                        </select>
+                        <!-- Sub Category -->
+                        <select id="subcategorySelect" name="subcategory" class="w-full border border-gray-300 rounded-lg py-2 px-4 focus:ring-2 focus:ring-blue-500" required>
+                            <option value="" disabled selected>Sub Category</option>
+                        </select>
+                    </div>
+
+                    <!-- Points Section -->
+                    <div class="mb-6">
+                        <input type="number" id="pointsInput" name="points" placeholder="Enter Points" class="w-full border border-gray-300 rounded-lg py-2 px-4 focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">
+                        Submit App
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- Subcategory Script -->
+    <script>
+        const subcategories = {
+            socialMedia: ["Instagram", "WhatsApp", "Facebook", "Twitter"],
+            productivity: ["Task Management", "Note Taking"],
+            entertainment: ["Streaming", "Gaming"],
+            education: ["Online Courses", "Language Learning"],
+            finance: ["Expense Tracking", "Budgeting"],
+            healthFitness: ["Workout Plans", "Nutrition"],
+            shopping: ["E-Commerce", "Coupons"],
+            travel: ["Flight Booking", "Travel Guides"]
+        };
+
+        const categorySelect = document.getElementById("categorySelect");
+        const subcategorySelect = document.getElementById("subcategorySelect");
+
+        categorySelect.addEventListener("change", () => {
+            const selectedCategory = categorySelect.value;
+            subcategorySelect.innerHTML = '<option value="" disabled selected>Sub Category</option>';
+            if (subcategories[selectedCategory]) {
+                subcategories[selectedCategory].forEach(subcategory => {
+                    const option = document.createElement("option");
+                    option.value = subcategory.toLowerCase();
+                    option.textContent = subcategory;
+                    subcategorySelect.appendChild(option);
+                });
+            }
+        });
+    </script>
+
+    <!-- Form Submission Script -->
+    <script>
+        document.getElementById("appForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const formData = {
+                name: e.target.name.value,
+                link: e.target.link.value,
+                category: categorySelect.value,
+                subcategory: subcategorySelect.value,
+                points: e.target.points.value
+            };
+
+            const csrfToken = document.querySelector('[name="csrf-token"]').content;
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/add-app/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert("App added successfully!");
+                } else {
+                    alert(data.error || "Something went wrong.");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("An error occurred. Please try again.");
+            }
+        });
+    </script>
+</body>
+</html>
+
+
