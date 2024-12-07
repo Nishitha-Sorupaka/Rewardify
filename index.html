@@ -79,7 +79,6 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRFToken': document.querySelector('[name=csrf-token]').content,
                     },
                     body: JSON.stringify({ email, password }),
                 });
@@ -88,7 +87,13 @@
         
                 if (response.ok) {
                     localStorage.setItem('token', result.token);
-                    window.location.href = result.redirect_url;
+        
+                    // Redirect based on user role
+                    if (result.is_superuser) {
+                        window.location.href = "adminhome.html";
+                    } else {
+                        window.location.href = "userprofile.html";
+                    }
                 } else {
                     alert(result.error || 'Invalid credentials. Please try again.');
                 }
@@ -96,8 +101,7 @@
                 alert('An error occurred. Please try again.');
                 console.error(error);
             }
-        });
-        
+        });        
     </script>
 </body>
 </html>
